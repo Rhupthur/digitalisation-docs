@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Test analyse.js</title>
+</head>
+<body>
+
+  <h3>Test analyse.js — Chargement modèle</h3>
+  <pre id="resultat">en attente...</pre>
+
+  <script src="js/libs.js"></script>
+  <script src="js/extraction.js"></script>
+  <script src="js/analyse.js"></script>
+  <script type="module">
+
+    initialiser().then(async function() {
+
+      document.getElementById('resultat').textContent =
+        'Chargement du modèle distilbert (~67MB)...';
+
+      await chargerModele();
+
+      document.getElementById('resultat').textContent =
+        JSON.stringify({
+          modele  : 'distilbert-multilingual',
+          statut  : 'chargé',
+          pret    : modeleQA !== null
+        }, null, 2);
+
+    });
+
+  </script>
+
+</body>
+</html>

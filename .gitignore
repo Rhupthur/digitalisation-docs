@@ -1,0 +1,12 @@
+# Modèles — trop lourds pour git
+models/
+env-conversion/
+
+# Libs locales — seront sur CDN en prod
+libs/
+
+# Système
+.DS_Store
+__pycache__/
+*.pyc
+node_modules/
