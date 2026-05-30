@@ -229,9 +229,9 @@ async function rendrePageEnImage(pdfDoc, numPage){
 */
 async function ocrAvecTesseract(canvas){
 
-    var resultat = await Tesseract.recognize(canvas, 'fra', {
+    var resultat = await Tesseract.recognize(canvas, 'fra_best', {
+        langPath: '/libs/tessdata',
         logger: function(m) {
-
             if (m.status === 'recognizing text') {
                 var pct = Math.round((m.progress || 0) * 100);
                 console.log('OCR en cours : ' + pct + '%');

@@ -2,33 +2,1424 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Test analyse.js</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigitaDocs — Numérisation intelligente</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0f2d52">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="DigitaDocs">
+  <link rel="icon" href="/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ══════════════════════════════════════════
+       VARIABLES & RESET
+    ══════════════════════════════════════════ */
+    :root {
+      --bleu-nuit    : #0f2d52;
+      --bleu-vif     : #1a6eb5;
+      --bleu-clair   : #e8f1fb;
+      --or           : #c9933a;
+      --creme        : #faf7f2;
+      --blanc        : #ffffff;
+      --gris-doux    : #f0ece4;
+      --gris-texte   : #6b6560;
+      --rouge-alerte : #c0392b;
+      --vert-ok      : #1e7e5a;
+      --ombre        : 0 4px 24px rgba(15,45,82,0.10);
+      --ombre-forte  : 0 8px 40px rgba(15,45,82,0.18);
+      --rayon        : 16px;
+      --rayon-sm     : 10px;
+      --transition   : 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family    : 'DM Sans', sans-serif;
+      background     : var(--creme);
+      color          : var(--bleu-nuit);
+      min-height     : 100vh;
+      padding-bottom : 60px;
+    }
+
+    /* ══════════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════════ */
+    header {
+      background     : var(--bleu-nuit);
+      padding        : 20px 24px 18px;
+      position       : sticky;
+      top            : 0;
+      z-index        : 100;
+      box-shadow     : 0 2px 16px rgba(15,45,82,0.25);
+    }
+
+    .header-inner {
+      max-width      : 640px;
+      margin         : 0 auto;
+      display        : flex;
+      align-items    : center;
+      gap            : 14px;
+    }
+
+    .logo {
+      width          : 40px;
+      height         : 40px;
+      background     : var(--or);
+      border-radius  : 10px;
+      display        : flex;
+      align-items    : center;
+      justify-content: center;
+      font-family    : 'Playfair Display', serif;
+      font-size      : 18px;
+      color          : var(--blanc);
+      font-weight    : 700;
+      flex-shrink    : 0;
+    }
+
+    .header-texte h1 {
+      font-family    : 'Playfair Display', serif;
+      font-size      : 20px;
+      color          : var(--blanc);
+      line-height    : 1.1;
+    }
+
+    .header-texte p {
+      font-size      : 12px;
+      color          : rgba(255,255,255,0.55);
+      font-weight    : 300;
+      margin-top     : 2px;
+    }
+
+    .badge-offline {
+      margin-left    : auto;
+      background     : rgba(201,147,58,0.2);
+      border         : 1px solid rgba(201,147,58,0.4);
+      color          : var(--or);
+      font-size      : 11px;
+      font-weight    : 600;
+      padding        : 4px 10px;
+      border-radius  : 20px;
+      letter-spacing : 0.5px;
+      flex-shrink    : 0;
+    }
+
+    /* ══════════════════════════════════════════
+       CONTENU PRINCIPAL
+    ══════════════════════════════════════════ */
+    main {
+      max-width      : 640px;
+      margin         : 0 auto;
+      padding        : 24px 16px;
+    }
+
+    /* ══════════════════════════════════════════
+       ÉTAPES
+    ══════════════════════════════════════════ */
+    .etapes {
+      display        : flex;
+      gap            : 0;
+      margin-bottom  : 28px;
+      background     : var(--blanc);
+      border-radius  : var(--rayon);
+      padding        : 4px;
+      box-shadow     : var(--ombre);
+    }
+
+    .etape-btn {
+      flex           : 1;
+      padding        : 10px 8px;
+      border         : none;
+      background     : transparent;
+      border-radius  : var(--rayon-sm);
+      font-family    : 'DM Sans', sans-serif;
+      font-size      : 13px;
+      font-weight    : 500;
+      color          : var(--gris-texte);
+      cursor         : pointer;
+      transition     : var(--transition);
+      display        : flex;
+      flex-direction : column;
+      align-items    : center;
+      gap            : 4px;
+    }
+
+    .etape-btn .num {
+      width          : 24px;
+      height         : 24px;
+      border-radius  : 50%;
+      background     : var(--gris-doux);
+      display        : flex;
+      align-items    : center;
+      justify-content: center;
+      font-size      : 12px;
+      font-weight    : 600;
+      transition     : var(--transition);
+    }
+
+    .etape-btn.active {
+      background     : var(--bleu-nuit);
+      color          : var(--blanc);
+    }
+
+    .etape-btn.active .num {
+      background     : var(--or);
+      color          : var(--blanc);
+    }
+
+    .etape-btn.complete .num {
+      background     : var(--vert-ok);
+      color          : var(--blanc);
+    }
+
+    .etape-btn.complete .num::after {
+      content        : '✓';
+    }
+
+    /* ══════════════════════════════════════════
+       CARTE
+    ══════════════════════════════════════════ */
+    .carte {
+      background     : var(--blanc);
+      border-radius  : var(--rayon);
+      padding        : 24px;
+      box-shadow     : var(--ombre);
+      margin-bottom  : 16px;
+      animation      : glisser 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    @keyframes glisser {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .carte-titre {
+      font-family    : 'Playfair Display', serif;
+      font-size      : 18px;
+      color          : var(--bleu-nuit);
+      margin-bottom  : 4px;
+    }
+
+    .carte-sous-titre {
+      font-size      : 13px;
+      color          : var(--gris-texte);
+      margin-bottom  : 20px;
+    }
+
+    /* ══════════════════════════════════════════
+       ZONE DE DÉPÔT
+    ══════════════════════════════════════════ */
+    .zone-depot {
+      border         : 2px dashed #c8d8ea;
+      border-radius  : var(--rayon);
+      padding        : 36px 20px;
+      text-align     : center;
+      cursor         : pointer;
+      transition     : var(--transition);
+      position       : relative;
+      background     : var(--bleu-clair);
+    }
+
+    .zone-depot:hover,
+    .zone-depot.survol {
+      border-color   : var(--bleu-vif);
+      background     : #dceaf8;
+    }
+
+    .zone-depot input[type="file"] {
+      position       : absolute;
+      inset          : 0;
+      opacity        : 0;
+      cursor         : pointer;
+      width          : 100%;
+      height         : 100%;
+    }
+
+    .depot-icone {
+      font-size      : 40px;
+      margin-bottom  : 12px;
+      display        : block;
+    }
+
+    .depot-texte {
+      font-size      : 15px;
+      font-weight    : 500;
+      color          : var(--bleu-nuit);
+      margin-bottom  : 6px;
+    }
+
+    .depot-sous-texte {
+      font-size      : 13px;
+      color          : var(--gris-texte);
+    }
+
+    /* Aperçu fichier */
+    .apercu-fichier {
+      display        : flex;
+      align-items    : center;
+      gap            : 12px;
+      padding        : 14px 16px;
+      background     : var(--bleu-clair);
+      border-radius  : var(--rayon-sm);
+      margin-top     : 14px;
+      animation      : glisser 0.3s ease;
+    }
+
+    .apercu-icone {
+      width          : 40px;
+      height         : 40px;
+      background     : var(--bleu-nuit);
+      border-radius  : 8px;
+      display        : flex;
+      align-items    : center;
+      justify-content: center;
+      font-size      : 18px;
+      flex-shrink    : 0;
+    }
+
+    .apercu-info {
+      flex           : 1;
+      min-width      : 0;
+    }
+
+    .apercu-nom {
+      font-size      : 14px;
+      font-weight    : 600;
+      color          : var(--bleu-nuit);
+      white-space    : nowrap;
+      overflow       : hidden;
+      text-overflow  : ellipsis;
+    }
+
+    .apercu-taille {
+      font-size      : 12px;
+      color          : var(--gris-texte);
+    }
+
+    .apercu-suppr {
+      background     : none;
+      border         : none;
+      color          : var(--gris-texte);
+      cursor         : pointer;
+      font-size      : 18px;
+      padding        : 4px;
+      border-radius  : 6px;
+      transition     : var(--transition);
+    }
+
+    .apercu-suppr:hover { color: var(--rouge-alerte); background: #fdecea; }
+
+    /* ══════════════════════════════════════════
+       FORMULAIRE
+    ══════════════════════════════════════════ */
+    .champ {
+      margin-bottom  : 16px;
+    }
+
+    .champ label {
+      display        : block;
+      font-size      : 13px;
+      font-weight    : 600;
+      color          : var(--bleu-nuit);
+      margin-bottom  : 8px;
+      letter-spacing : 0.3px;
+    }
+
+    .champ select,
+    .champ input[type="text"] {
+      width          : 100%;
+      padding        : 12px 16px;
+      border         : 2px solid var(--gris-doux);
+      border-radius  : var(--rayon-sm);
+      font-family    : 'DM Sans', sans-serif;
+      font-size      : 15px;
+      color          : var(--bleu-nuit);
+      background     : var(--blanc);
+      transition     : var(--transition);
+      appearance     : none;
+      -webkit-appearance: none;
+    }
+
+    .champ select:focus,
+    .champ input[type="text"]:focus {
+      outline        : none;
+      border-color   : var(--bleu-vif);
+      box-shadow     : 0 0 0 3px rgba(26,110,181,0.12);
+    }
+
+    /* Types de document — boutons radio visuels */
+    .type-grille {
+      display        : grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap            : 10px;
+    }
+
+    .type-carte {
+      border         : 2px solid var(--gris-doux);
+      border-radius  : var(--rayon-sm);
+      padding        : 14px 8px;
+      text-align     : center;
+      cursor         : pointer;
+      transition     : var(--transition);
+      background     : var(--blanc);
+    }
+
+    .type-carte:hover {
+      border-color   : var(--bleu-vif);
+      background     : var(--bleu-clair);
+    }
+
+    .type-carte.selectionne {
+      border-color   : var(--bleu-nuit);
+      background     : var(--bleu-nuit);
+      color          : var(--blanc);
+    }
+
+    .type-carte .icone {
+      font-size      : 24px;
+      display        : block;
+      margin-bottom  : 6px;
+    }
+
+    .type-carte .label {
+      font-size      : 12px;
+      font-weight    : 600;
+    }
+
+    /* Champs custom pour "Autres" */
+    .champs-custom {
+      margin-top     : 14px;
+      display        : none;
+    }
+
+    .champs-custom.visible { display: block; }
+
+    .champ-custom-ligne {
+      display        : flex;
+      gap            : 8px;
+      margin-bottom  : 8px;
+      animation      : glisser 0.25s ease;
+    }
+
+    .champ-custom-ligne input {
+      flex           : 1;
+      padding        : 10px 14px;
+      border         : 2px solid var(--gris-doux);
+      border-radius  : var(--rayon-sm);
+      font-family    : 'DM Sans', sans-serif;
+      font-size      : 14px;
+      color          : var(--bleu-nuit);
+      transition     : var(--transition);
+    }
+
+    .champ-custom-ligne input:focus {
+      outline        : none;
+      border-color   : var(--bleu-vif);
+    }
+
+    .btn-suppr-champ {
+      background     : var(--gris-doux);
+      border         : none;
+      border-radius  : var(--rayon-sm);
+      padding        : 0 12px;
+      cursor         : pointer;
+      color          : var(--gris-texte);
+      font-size      : 16px;
+      transition     : var(--transition);
+    }
+
+    .btn-suppr-champ:hover { background: #fdecea; color: var(--rouge-alerte); }
+
+    .btn-ajouter-champ {
+      width          : 100%;
+      padding        : 10px;
+      border         : 2px dashed #c8d8ea;
+      border-radius  : var(--rayon-sm);
+      background     : transparent;
+      color          : var(--bleu-vif);
+      font-family    : 'DM Sans', sans-serif;
+      font-size      : 14px;
+      font-weight    : 500;
+      cursor         : pointer;
+      transition     : var(--transition);
+      margin-top     : 4px;
+    }
+
+    .btn-ajouter-champ:hover {
+      background     : var(--bleu-clair);
+      border-color   : var(--bleu-vif);
+    }
+
+    /* Format export */
+    .format-grille {
+      display        : grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap            : 10px;
+    }
+
+    .format-carte {
+      border         : 2px solid var(--gris-doux);
+      border-radius  : var(--rayon-sm);
+      padding        : 12px 8px;
+      text-align     : center;
+      cursor         : pointer;
+      transition     : var(--transition);
+    }
+
+    .format-carte:hover {
+      border-color   : var(--bleu-vif);
+      background     : var(--bleu-clair);
+    }
+
+    .format-carte.selectionne {
+      border-color   : var(--or);
+      background     : rgba(201,147,58,0.08);
+    }
+
+    .format-carte .icone { font-size: 22px; display: block; margin-bottom: 4px; }
+    .format-carte .label { font-size: 13px; font-weight: 600; color: var(--bleu-nuit); }
+
+    /* ══════════════════════════════════════════
+       BOUTON PRINCIPAL
+    ══════════════════════════════════════════ */
+    .btn-principal {
+      width          : 100%;
+      padding        : 16px;
+      background     : var(--bleu-nuit);
+      color          : var(--blanc);
+      border         : none;
+      border-radius  : var(--rayon);
+      font-family    : 'Playfair Display', serif;
+      font-size      : 17px;
+      font-weight    : 600;
+      cursor         : pointer;
+      transition     : var(--transition);
+      display        : flex;
+      align-items    : center;
+      justify-content: center;
+      gap            : 10px;
+      margin-top     : 8px;
+      box-shadow     : 0 4px 16px rgba(15,45,82,0.25);
+    }
+
+    .btn-principal:hover:not(:disabled) {
+      background     : #1a3d6e;
+      box-shadow     : var(--ombre-forte);
+      transform      : translateY(-1px);
+    }
+
+    .btn-principal:disabled {
+      opacity        : 0.5;
+      cursor         : not-allowed;
+    }
+
+    .btn-secondaire {
+      width          : 100%;
+      padding        : 14px;
+      background     : transparent;
+      color          : var(--bleu-nuit);
+      border         : 2px solid var(--bleu-nuit);
+      border-radius  : var(--rayon);
+      font-family    : 'DM Sans', sans-serif;
+      font-size      : 15px;
+      font-weight    : 600;
+      cursor         : pointer;
+      transition     : var(--transition);
+      margin-top     : 10px;
+    }
+
+    .btn-secondaire:hover {
+      background     : var(--bleu-clair);
+    }
+
+    /* ══════════════════════════════════════════
+       PROGRESSION
+    ══════════════════════════════════════════ */
+    .progression-conteneur {
+      margin-bottom  : 20px;
+    }
+
+    .progression-etape {
+      display        : flex;
+      align-items    : center;
+      gap            : 12px;
+      padding        : 12px 0;
+      border-bottom  : 1px solid var(--gris-doux);
+    }
+
+    .progression-etape:last-child { border-bottom: none; }
+
+    .prog-icone {
+      width          : 36px;
+      height         : 36px;
+      border-radius  : 50%;
+      background     : var(--gris-doux);
+      display        : flex;
+      align-items    : center;
+      justify-content: center;
+      font-size      : 16px;
+      flex-shrink    : 0;
+      transition     : var(--transition);
+    }
+
+    .prog-icone.en-cours {
+      background     : var(--bleu-clair);
+      animation      : pulse 1.5s infinite;
+    }
+
+    .prog-icone.termine {
+      background     : var(--vert-ok);
+      color          : var(--blanc);
+    }
+
+    .prog-icone.erreur {
+      background     : #fdecea;
+      color          : var(--rouge-alerte);
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(26,110,181,0.3); }
+      50%       { box-shadow: 0 0 0 6px rgba(26,110,181,0); }
+    }
+
+    .prog-info { flex: 1; }
+
+    .prog-nom {
+      font-size      : 14px;
+      font-weight    : 600;
+      color          : var(--bleu-nuit);
+    }
+
+    .prog-detail {
+      font-size      : 12px;
+      color          : var(--gris-texte);
+      margin-top     : 2px;
+    }
+
+    .barre-conteneur {
+      height         : 4px;
+      background     : var(--gris-doux);
+      border-radius  : 2px;
+      margin-top     : 6px;
+      overflow       : hidden;
+    }
+
+    .barre-remplissage {
+      height         : 100%;
+      background     : var(--bleu-vif);
+      border-radius  : 2px;
+      transition     : width 0.4s ease;
+      width          : 0%;
+    }
+
+    .barre-remplissage.complete { background: var(--vert-ok); width: 100%; }
+
+    /* ══════════════════════════════════════════
+       RÉSULTAT
+    ══════════════════════════════════════════ */
+    .alerte {
+      padding        : 12px 16px;
+      border-radius  : var(--rayon-sm);
+      font-size      : 14px;
+      font-weight    : 500;
+      margin-bottom  : 16px;
+      display        : flex;
+      align-items    : center;
+      gap            : 10px;
+    }
+
+    .alerte.verification {
+      background     : rgba(201,147,58,0.12);
+      border         : 1px solid rgba(201,147,58,0.4);
+      color          : #7a5a1e;
+    }
+
+    .alerte.succes {
+      background     : rgba(30,126,90,0.10);
+      border         : 1px solid rgba(30,126,90,0.3);
+      color          : var(--vert-ok);
+    }
+
+    .alerte.erreur {
+      background     : #fdecea;
+      border         : 1px solid rgba(192,57,43,0.3);
+      color          : var(--rouge-alerte);
+    }
+
+    /* Tableau résultat */
+    .tableau-resultat {
+      width          : 100%;
+      border-collapse: collapse;
+      font-size      : 14px;
+    }
+
+    .tableau-resultat th {
+      text-align     : left;
+      padding        : 10px 12px;
+      background     : var(--bleu-nuit);
+      color          : var(--blanc);
+      font-weight    : 600;
+      font-size      : 12px;
+      letter-spacing : 0.5px;
+      text-transform : uppercase;
+    }
+
+    .tableau-resultat th:first-child { border-radius: 8px 0 0 0; }
+    .tableau-resultat th:last-child  { border-radius: 0 8px 0 0; }
+
+    .tableau-resultat td {
+      padding        : 10px 12px;
+      border-bottom  : 1px solid var(--gris-doux);
+      color          : var(--bleu-nuit);
+      vertical-align : top;
+    }
+
+    .tableau-resultat tr:last-child td { border-bottom: none; }
+
+    .tableau-resultat tr:nth-child(even) td { background: var(--bleu-clair); }
+
+    .champ-label {
+      font-weight    : 600;
+      color          : var(--gris-texte);
+      font-size      : 12px;
+      text-transform : uppercase;
+      letter-spacing : 0.3px;
+    }
+
+    .champ-valeur {
+      color          : var(--bleu-nuit);
+      font-weight    : 500;
+    }
+
+    .champ-null {
+      color          : #bbb;
+      font-style     : italic;
+      font-size      : 13px;
+    }
+
+    /* Sous-tableau matières */
+    .matieres-liste {
+      margin-top     : 4px;
+    }
+
+    .matiere-ligne {
+      display        : flex;
+      justify-content: space-between;
+      padding        : 5px 0;
+      border-bottom  : 1px solid var(--gris-doux);
+      font-size      : 13px;
+    }
+
+    .matiere-ligne:last-child { border-bottom: none; }
+
+    .matiere-note {
+      font-weight    : 700;
+      color          : var(--bleu-vif);
+    }
+
+    /* Infos méthode */
+    .infos-methode {
+      display        : flex;
+      gap            : 8px;
+      flex-wrap      : wrap;
+      margin-bottom  : 16px;
+    }
+
+    .badge {
+      padding        : 4px 12px;
+      border-radius  : 20px;
+      font-size      : 12px;
+      font-weight    : 600;
+    }
+
+    .badge-methode {
+      background     : var(--bleu-clair);
+      color          : var(--bleu-nuit);
+    }
+
+    .badge-confiance {
+      background     : rgba(30,126,90,0.1);
+      color          : var(--vert-ok);
+    }
+
+    .badge-confiance.faible {
+      background     : rgba(201,147,58,0.12);
+      color          : #7a5a1e;
+    }
+
+    /* ══════════════════════════════════════════
+       SKELETON LOADING
+    ══════════════════════════════════════════ */
+    .skeleton {
+      background     : linear-gradient(90deg, var(--gris-doux) 25%, #e8e4dc 50%, var(--gris-doux) 75%);
+      background-size: 200% 100%;
+      animation      : shimmer 1.5s infinite;
+      border-radius  : 6px;
+      height         : 16px;
+      margin-bottom  : 8px;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ══════════════════════════════════════════
+       UTILITAIRES
+    ══════════════════════════════════════════ */
+    .cache { display: none !important; }
+
+    .separateur {
+      height         : 1px;
+      background     : var(--gris-doux);
+      margin         : 20px 0;
+    }
+
+    .texte-centre { text-align: center; }
+
+    .mt-16 { margin-top: 16px; }
+
+  </style>
 </head>
 <body>
 
-  <h3>Test analyse.js — Chargement modèle</h3>
-  <pre id="resultat">en attente...</pre>
+  <!-- HEADER -->
+  <header>
+    <div class="header-inner">
+      <div class="logo">DD</div>
+      <div class="header-texte">
+        <h1>DigitaDocs</h1>
+        <p>Numérisation intelligente de documents</p>
+      </div>
+      <span class="badge-offline">● OFFLINE</span>
+    </div>
+  </header>
 
+  <main>
+
+    <!-- ÉTAPES -->
+    <div class="etapes">
+      <button class="etape-btn active" id="btn-etape-1">
+        <span class="num">1</span>
+        Document
+      </button>
+      <button class="etape-btn" id="btn-etape-2">
+        <span class="num">2</span>
+        Options
+      </button>
+      <button class="etape-btn" id="btn-etape-3">
+        <span class="num">3</span>
+        Résultat
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         ÉTAPE 1 — CHOISIR LE DOCUMENT
+    ══════════════════════════════════════ -->
+    <div id="section-etape-1">
+
+      <div class="carte">
+        <p class="carte-titre">Choisir un document</p>
+        <p class="carte-sous-titre">PDF ou image — relevé de notes, acte de naissance, ou tout autre document</p>
+
+        <div class="zone-depot" id="zone-depot">
+          <input type="file" id="input-fichier" accept=".pdf,image/*">
+          <span class="depot-icone">📄</span>
+          <p class="depot-texte">Déposer un fichier ici</p>
+          <p class="depot-sous-texte">ou appuyer pour choisir • PDF, JPG, PNG</p>
+        </div>
+
+        <div id="apercu-fichier" class="cache">
+          <div class="apercu-fichier">
+            <div class="apercu-icone" id="apercu-icone">📄</div>
+            <div class="apercu-info">
+              <div class="apercu-nom" id="apercu-nom">—</div>
+              <div class="apercu-taille" id="apercu-taille">—</div>
+            </div>
+            <button class="apercu-suppr" id="btn-suppr-fichier" title="Supprimer">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-principal" id="btn-suivant-1" disabled>
+        Continuer →
+      </button>
+
+    </div>
+
+    <!-- ══════════════════════════════════════
+         ÉTAPE 2 — OPTIONS
+    ══════════════════════════════════════ -->
+    <div id="section-etape-2" class="cache">
+
+      <div class="carte">
+        <p class="carte-titre">Type de document</p>
+        <p class="carte-sous-titre">Sélectionnez le type pour une extraction optimale</p>
+
+        <div class="type-grille">
+          <div class="type-carte selectionne" data-type="releve" id="type-releve">
+            <span class="icone">🎓</span>
+            <span class="label">Relevé de notes</span>
+          </div>
+          <div class="type-carte" data-type="acte" id="type-acte">
+            <span class="icone">📋</span>
+            <span class="label">Acte de naissance</span>
+          </div>
+          <div class="type-carte" data-type="autres" id="type-autres">
+            <span class="icone">📝</span>
+            <span class="label">Autres</span>
+          </div>
+        </div>
+
+        <!-- Champs custom pour "Autres" -->
+        <div class="champs-custom" id="champs-custom">
+          <div class="separateur"></div>
+          <p style="font-size:13px;font-weight:600;color:var(--bleu-nuit);margin-bottom:12px;">
+            Définir les champs à extraire
+          </p>
+          <div id="liste-champs-custom">
+            <!-- champs ajoutés dynamiquement -->
+          </div>
+          <button class="btn-ajouter-champ" id="btn-ajouter-champ">
+            + Ajouter un champ
+          </button>
+        </div>
+      </div>
+
+      <div class="carte">
+        <p class="carte-titre">Format d'export</p>
+        <p class="carte-sous-titre">Choisissez comment télécharger le résultat</p>
+
+        <div class="format-grille">
+          <div class="format-carte selectionne" data-format="json">
+            <span class="icone">{ }</span>
+            <span class="label">JSON</span>
+          </div>
+          <div class="format-carte" data-format="csv">
+            <span class="icone">📊</span>
+            <span class="label">CSV</span>
+          </div>
+          <div class="format-carte" data-format="excel">
+            <span class="icone">📗</span>
+            <span class="label">Excel</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-principal" id="btn-traiter" disabled>
+          ⚡ Lancer l'extraction
+      </button>
+      <button class="btn-secondaire" id="btn-retour-1">
+        ← Retour
+      </button>
+
+    </div>
+
+    <!-- ══════════════════════════════════════
+         ÉTAPE 3 — TRAITEMENT + RÉSULTAT
+    ══════════════════════════════════════ -->
+    <div id="section-etape-3" class="cache">
+
+      <!-- Progression -->
+      <div class="carte" id="carte-progression">
+        <p class="carte-titre">Traitement en cours...</p>
+        <p class="carte-sous-titre" id="prog-message">Initialisation du pipeline</p>
+
+        <div class="progression-conteneur">
+
+          <div class="progression-etape">
+            <div class="prog-icone" id="prog-icone-1">📄</div>
+            <div class="prog-info">
+              <div class="prog-nom">Extraction du texte</div>
+              <div class="prog-detail" id="prog-detail-1">En attente...</div>
+              <div class="barre-conteneur">
+                <div class="barre-remplissage" id="prog-barre-1"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="progression-etape">
+            <div class="prog-icone" id="prog-icone-2">🧹</div>
+            <div class="prog-info">
+              <div class="prog-nom">Prétraitement</div>
+              <div class="prog-detail" id="prog-detail-2">En attente...</div>
+              <div class="barre-conteneur">
+                <div class="barre-remplissage" id="prog-barre-2"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="progression-etape">
+            <div class="prog-icone" id="prog-icone-3">🤖</div>
+            <div class="prog-info">
+              <div class="prog-nom">Analyse IA</div>
+              <div class="prog-detail" id="prog-detail-3">En attente...</div>
+              <div class="barre-conteneur">
+                <div class="barre-remplissage" id="prog-barre-3"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="progression-etape">
+            <div class="prog-icone" id="prog-icone-4">💾</div>
+            <div class="prog-info">
+              <div class="prog-nom">Export</div>
+              <div class="prog-detail" id="prog-detail-4">En attente...</div>
+              <div class="barre-conteneur">
+                <div class="barre-remplissage" id="prog-barre-4"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Résultat -->
+      <div id="carte-resultat" class="cache">
+
+        <div id="alerte-resultat"></div>
+
+        <div class="carte">
+          <div class="infos-methode" id="infos-methode"></div>
+          <p class="carte-titre">Données extraites</p>
+          <p class="carte-sous-titre" id="resultat-sous-titre"></p>
+          <div class="separateur"></div>
+          <div id="tableau-conteneur"></div>
+        </div>
+
+        <button class="btn-principal" id="btn-nouveau">
+          + Traiter un nouveau document
+        </button>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- SCRIPTS MODULES -->
   <script src="js/libs.js"></script>
   <script src="js/extraction.js"></script>
+  <script src="js/manuscrit.js"></script>
+  <script src="js/pretraitement.js"></script>
   <script src="js/analyse.js"></script>
+  <script src="js/analyse_llm.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/main.js"></script>
+
   <script type="module">
 
-    initialiser().then(async function() {
+    /* ══════════════════════════════════════════
+       ÉTAT GLOBAL
+    ══════════════════════════════════════════ */
+    var etat = {
+      fichier       : null,
+      typeDoc       : 'releve',
+      formatExport  : 'json',
+      champsCustom  : [],
+    };
 
-      document.getElementById('resultat').textContent =
-        'Chargement du modèle distilbert (~67MB)...';
+    /* ══════════════════════════════════════════
+       INITIALISATION
+    ══════════════════════════════════════════ */
+    initialiser().then(function() {
+        console.log('DigitaDocs prêt — ' + JSON.stringify(CAPACITES));
+        document.getElementById('btn-traiter').disabled = false;
+    }).catch(function(err) {
+        console.error('Erreur initialisation :', err);
+    });
 
-      await chargerModele();
+    /* ══════════════════════════════════════════
+       NAVIGATION ENTRE ÉTAPES
+    ══════════════════════════════════════════ */
+    function allerEtape(n) {
+      document.getElementById('section-etape-1').classList.toggle('cache', n !== 1);
+      document.getElementById('section-etape-2').classList.toggle('cache', n !== 2);
+      document.getElementById('section-etape-3').classList.toggle('cache', n !== 3);
 
-      document.getElementById('resultat').textContent =
-        JSON.stringify({
-          modele  : 'distilbert-multilingual',
-          statut  : 'chargé',
-          pret    : modeleQA !== null
-        }, null, 2);
+      document.getElementById('btn-etape-1').classList.toggle('active', n === 1);
+      document.getElementById('btn-etape-2').classList.toggle('active', n === 2);
+      document.getElementById('btn-etape-3').classList.toggle('active', n === 3);
+
+      if (n > 1) document.getElementById('btn-etape-1').classList.add('complete');
+      if (n > 2) document.getElementById('btn-etape-2').classList.add('complete');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ══════════════════════════════════════════
+       ÉTAPE 1 — FICHIER
+    ══════════════════════════════════════════ */
+    var inputFichier = document.getElementById('input-fichier');
+    var zoneDepot    = document.getElementById('zone-depot');
+
+    inputFichier.addEventListener('change', function(e) {
+      var f = e.target.files[0];
+      if (f) choisirFichier(f);
+    });
+
+    // Drag & Drop
+    zoneDepot.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      zoneDepot.classList.add('survol');
+    });
+
+    zoneDepot.addEventListener('dragleave', function() {
+      zoneDepot.classList.remove('survol');
+    });
+
+    zoneDepot.addEventListener('drop', function(e) {
+      e.preventDefault();
+      zoneDepot.classList.remove('survol');
+      var f = e.dataTransfer.files[0];
+      if (f) choisirFichier(f);
+    });
+
+    function choisirFichier(f) {
+      etat.fichier = f;
+
+      var estPdf   = f.type === 'application/pdf' || f.name.endsWith('.pdf');
+      var icone    = estPdf ? '📄' : '🖼️';
+      var taille   = (f.size / 1024 / 1024).toFixed(2) + ' MB';
+
+      document.getElementById('apercu-icone').textContent  = icone;
+      document.getElementById('apercu-nom').textContent    = f.name;
+      document.getElementById('apercu-taille').textContent = taille;
+      document.getElementById('apercu-fichier').classList.remove('cache');
+      document.getElementById('btn-suivant-1').disabled = false;
+    }
+
+    document.getElementById('btn-suppr-fichier').addEventListener('click', function() {
+      etat.fichier = null;
+      inputFichier.value = '';
+      document.getElementById('apercu-fichier').classList.add('cache');
+      document.getElementById('btn-suivant-1').disabled = true;
+    });
+
+    document.getElementById('btn-suivant-1').addEventListener('click', function() {
+      allerEtape(2);
+    });
+
+    /* ══════════════════════════════════════════
+       ÉTAPE 2 — OPTIONS
+    ══════════════════════════════════════════ */
+
+    // Type de document
+    document.querySelectorAll('.type-carte').forEach(function(carte) {
+      carte.addEventListener('click', function() {
+        document.querySelectorAll('.type-carte').forEach(function(c) {
+          c.classList.remove('selectionne');
+        });
+        carte.classList.add('selectionne');
+        etat.typeDoc = carte.dataset.type;
+
+        var champsCustom = document.getElementById('champs-custom');
+        if (etat.typeDoc === 'autres') {
+          champsCustom.classList.add('visible');
+          if (etat.champsCustom.length === 0) ajouterChampCustom();
+        } else {
+          champsCustom.classList.remove('visible');
+        }
+      });
+    });
+
+    // Champs custom
+    function ajouterChampCustom() {
+      var id    = Date.now();
+      var ligne = document.createElement('div');
+      ligne.className = 'champ-custom-ligne';
+      ligne.id        = 'champ-' + id;
+      ligne.innerHTML =
+        '<input type="text" placeholder="Nom du champ (ex: numéro)" class="cc-champ" data-id="' + id + '">' +
+        '<input type="text" placeholder="Question (ex: Quel est le numéro ?)" class="cc-question" data-id="' + id + '">' +
+        '<button class="btn-suppr-champ" data-id="' + id + '">✕</button>';
+
+      document.getElementById('liste-champs-custom').appendChild(ligne);
+
+      ligne.querySelector('.btn-suppr-champ').addEventListener('click', function() {
+        document.getElementById('champ-' + id).remove();
+        lireChampCustom();
+      });
+
+      ligne.querySelectorAll('input').forEach(function(inp) {
+        inp.addEventListener('input', lireChampCustom);
+      });
+    }
+
+    function lireChampCustom() {
+      etat.champsCustom = [];
+      document.querySelectorAll('.champ-custom-ligne').forEach(function(ligne) {
+        var champ    = ligne.querySelector('.cc-champ').value.trim();
+        var question = ligne.querySelector('.cc-question').value.trim();
+        if (champ && question) {
+          etat.champsCustom.push({ champ: champ, question: question });
+        }
+      });
+    }
+
+    document.getElementById('btn-ajouter-champ').addEventListener('click', ajouterChampCustom);
+
+    // Format export
+    document.querySelectorAll('.format-carte').forEach(function(carte) {
+      carte.addEventListener('click', function() {
+        document.querySelectorAll('.format-carte').forEach(function(c) {
+          c.classList.remove('selectionne');
+        });
+        carte.classList.add('selectionne');
+        etat.formatExport = carte.dataset.format;
+      });
+    });
+
+    document.getElementById('btn-retour-1').addEventListener('click', function() {
+      allerEtape(1);
+    });
+
+    /* ══════════════════════════════════════════
+       PROGRESSION
+    ══════════════════════════════════════════ */
+    function majProgression(etape, statut, detail, pourcent) {
+      var icone  = document.getElementById('prog-icone-' + etape);
+      var detailEl = document.getElementById('prog-detail-' + etape);
+      var barre  = document.getElementById('prog-barre-' + etape);
+
+      icone.className = 'prog-icone ' + statut;
+      if (statut === 'termine')   icone.textContent = '✓';
+      if (statut === 'erreur')    icone.textContent = '✕';
+
+      detailEl.textContent = detail;
+
+      if (pourcent !== undefined) {
+        barre.style.width = pourcent + '%';
+        if (pourcent >= 100) barre.classList.add('complete');
+      }
+    }
+
+    function majMessage(msg) {
+      document.getElementById('prog-message').textContent = msg;
+    }
+
+    /* ══════════════════════════════════════════
+       LANCEMENT DU TRAITEMENT
+    ══════════════════════════════════════════ */
+    document.getElementById('btn-traiter').addEventListener('click', async function() {
+
+      if (!etat.fichier) return;
+
+      allerEtape(3);
+      document.getElementById('carte-progression').classList.remove('cache');
+      document.getElementById('carte-resultat').classList.add('cache');
+
+      // Réinitialiser les barres
+      for (var i = 1; i <= 4; i++) {
+        majProgression(i, '', 'En attente...', 0);
+        document.getElementById('prog-icone-' + i).className = 'prog-icone';
+      }
+
+      var nomFichier = 'document_' + etat.typeDoc + '_' + Date.now();
+
+      try {
+
+        // — ÉTAPE 1 : EXTRACTION —
+        majMessage('Extraction du texte...');
+        majProgression(1, 'en-cours', 'Lecture du fichier...', 10);
+
+        var extraction = await extraire(etat.fichier);
+        var confiance  = extraction.confiance;
+
+        // Basculement manuscrit si nécessaire
+        var estPdf = etat.fichier.type === 'application/pdf' ||
+                     etat.fichier.name.toLowerCase().endsWith('.pdf');
+
+        var methodeFinale = extraction.methode;
+        var texteExtrait  = extraction.texte;
+        var verif         = false;
+
+        if (!estPdf && confiance !== null && confiance < 60) {
+          majProgression(1, 'en-cours', 'Confiance faible — OCR manuscrit...', 60);
+
+          var img = new Image();
+          img.src = URL.createObjectURL(etat.fichier);
+          await new Promise(function(r) { img.onload = r; });
+          var canvas = document.createElement('canvas');
+          canvas.width = img.width; canvas.height = img.height;
+          canvas.getContext('2d').drawImage(img, 0, 0);
+          URL.revokeObjectURL(img.src);
+
+          var manuscrit  = await extraireManuscrit(canvas);
+          texteExtrait   = manuscrit.texte;
+          confiance      = manuscrit.confiance;
+          methodeFinale  = 'manuscrit';
+          verif          = manuscrit.verificationRequise;
+        } else if (confiance !== null && confiance < 60) {
+          verif = true;
+        }
+
+        majProgression(1, 'termine', 'Texte extrait — confiance ' +
+          (confiance !== null ? Math.round(confiance) + '%' : 'N/A'), 100);
+
+        // — ÉTAPE 2 : PRÉTRAITEMENT —
+        majMessage('Nettoyage du texte...');
+        majProgression(2, 'en-cours', 'Nettoyage en cours...', 30);
+
+        var texte = pretraiter(texteExtrait);
+        majProgression(2, 'termine', 'Texte nettoyé', 100);
+
+        // — ÉTAPE 3 : ANALYSE —
+        majMessage('Analyse par IA...');
+        majProgression(3, 'en-cours', 'Chargement du modèle...', 10);
+
+        var champs  = etat.typeDoc === 'autres' ? etat.champsCustom : null;
+        var donnees;
+
+        var callbackProgression = function(message, progress) {
+            var pct = progress !== undefined ? Math.round(progress * 100) : null;
+            majProgression(3, 'en-cours', message, pct);
+        };
+
+        try {
+            if (typeof CAPACITES !== 'undefined' && CAPACITES.webgpu) {
+                majProgression(3, 'en-cours', 'WebLLM (GPU)...', 10);
+                donnees = await analyserLLM(texte, etat.typeDoc, champs, callbackProgression);
+            } else {
+                throw new Error('WebGPU non disponible');
+            }
+        } catch (e) {
+            majProgression(3, 'en-cours', 'wllama (CPU)...', 10);
+            donnees = await analyser(texte, etat.typeDoc, champs);
+        }
+
+        majProgression(3, 'termine', 'Analyse terminée', 100);
+        await new Promise(function(r) { setTimeout(r, 100); });
+
+        // — ÉTAPE 4 : EXPORT —
+        majMessage('Export du fichier...');
+        majProgression(4, 'en-cours', 'Génération du fichier...', 50);
+        await exporter(donnees, etat.formatExport, nomFichier);
+        majProgression(4, 'termine', 'Fichier téléchargé', 100);
+
+        majMessage('Traitement terminé !');
+
+        // Afficher le résultat
+        afficherResultat(donnees, methodeFinale, confiance, verif, etat.typeDoc);
+
+      } catch (erreur) {
+        majMessage('Erreur lors du traitement');
+        console.error(erreur);
+
+        document.getElementById('carte-resultat').classList.remove('cache');
+        document.getElementById('alerte-resultat').innerHTML =
+          '<div class="alerte erreur">⚠️ ' + erreur.message + '</div>';
+      }
 
     });
+
+    /* ══════════════════════════════════════════
+       AFFICHAGE DU RÉSULTAT
+    ══════════════════════════════════════════ */
+    function afficherResultat(donnees, methode, confiance, verif, typeDoc) {
+
+      document.getElementById('carte-resultat').classList.remove('cache');
+
+      // Alerte vérification
+      var alerteHtml = '';
+      if (verif) {
+        alerteHtml = '<div class="alerte verification">⚠️ Vérification recommandée — confiance OCR faible (' +
+                     Math.round(confiance) + '%). Veuillez contrôler les données extraites.</div>';
+      } else {
+        alerteHtml = '<div class="alerte succes">✓ Extraction réussie</div>';
+      }
+      document.getElementById('alerte-resultat').innerHTML = alerteHtml;
+
+      // Badges méthode
+      var confianceClass = confiance !== null && confiance < 60 ? 'faible' : '';
+      document.getElementById('infos-methode').innerHTML =
+        '<span class="badge badge-methode">Méthode : ' + methode + '</span>' +
+        (confiance !== null
+          ? '<span class="badge badge-confiance ' + confianceClass + '">Confiance : ' + Math.round(confiance) + '%</span>'
+          : '') +
+        '<span class="badge badge-methode">Type : ' + typeDoc + '</span>';
+
+      document.getElementById('resultat-sous-titre').textContent =
+        Object.keys(donnees).length + ' champ(s) extrait(s)';
+
+      // Construire le tableau
+      var html = '<table class="tableau-resultat"><thead><tr><th>Champ</th><th>Valeur extraite</th></tr></thead><tbody>';
+
+      var cles = Object.keys(donnees);
+      for (var i = 0; i < cles.length; i++) {
+        var cle    = cles[i];
+        var valeur = donnees[cle];
+
+        if (cle === 'matieres' && Array.isArray(valeur)) {
+          html += '<tr><td class="champ-label">Matières / Notes</td><td>';
+          if (valeur.length === 0) {
+            html += '<span class="champ-null">Aucune matière détectée</span>';
+          } else {
+            html += '<div class="matieres-liste">';
+            for (var j = 0; j < valeur.length; j++) {
+              html += '<div class="matiere-ligne">' +
+                '<span>' + (valeur[j].matiere || '—') + '</span>' +
+                '<span class="matiere-note">' + (valeur[j].note || '—') + '</span>' +
+                '</div>';
+            }
+            html += '</div>';
+          }
+          html += '</td></tr>';
+        } else {
+          html += '<tr><td class="champ-label">' + cle.replace(/_/g, ' ') + '</td><td>';
+          if (valeur === null || valeur === undefined || valeur === '') {
+            html += '<span class="champ-null">Non trouvé</span>';
+          } else {
+            html += '<span class="champ-valeur">' + valeur + '</span>';
+          }
+          html += '</td></tr>';
+        }
+      }
+
+      html += '</tbody></table>';
+      document.getElementById('tableau-conteneur').innerHTML = html;
+
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    /* ══════════════════════════════════════════
+       NOUVEAU DOCUMENT
+    ══════════════════════════════════════════ */
+    document.getElementById('btn-nouveau').addEventListener('click', function() {
+      etat.fichier      = null;
+      etat.typeDoc      = 'releve';
+      etat.formatExport = 'json';
+      etat.champsCustom = [];
+
+      document.getElementById('input-fichier').value = '';
+      document.getElementById('apercu-fichier').classList.add('cache');
+      document.getElementById('btn-suivant-1').disabled = true;
+
+      document.querySelectorAll('.type-carte').forEach(function(c) { c.classList.remove('selectionne'); });
+      document.getElementById('type-releve').classList.add('selectionne');
+      document.querySelectorAll('.format-carte').forEach(function(c) { c.classList.remove('selectionne'); });
+      document.querySelector('.format-carte[data-format="json"]').classList.add('selectionne');
+      document.getElementById('liste-champs-custom').innerHTML = '';
+      document.getElementById('champs-custom').classList.remove('visible');
+
+      document.getElementById('btn-etape-1').classList.remove('complete');
+      document.getElementById('btn-etape-2').classList.remove('complete');
+
+      allerEtape(1);
+    });
+
+    /* ══════════════════════════════════════════
+       SERVICE WORKER
+    ══════════════════════════════════════════ */
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js')
+          .then(function(reg) { console.log('SW enregistré :', reg.scope); })
+          .catch(function(err) { console.error('SW erreur :', err.message); });
+      });
+    }
 
   </script>
 

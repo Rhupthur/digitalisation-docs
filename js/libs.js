@@ -57,14 +57,15 @@ async function detecterCapacites(){
 
     // Choisir le model d'IA en fonction des capacites ci-dessus
     if (!CAPACITES.webgpu) {
-        CAPACITES.modele_ia = 'distilbert';
+        CAPACITES.modele_ia = 'qwen-wllama';
+        CAPACITES.webllm = false;
     } else if (CAPACITES.ram >= 4) {
-        CAPACITES.modele_ia = 'qwen2.5-q4f32';
+        CAPACITES.modele_ia = 'qwen-webllm';
         CAPACITES.webllm = true;
     
     } else {
-        CAPACITES.modele_ia = 'qwen2.5-q4f16';
-        CAPACITES.webllm = true;
+        CAPACITES.modele_ia = 'qwen-wllama';
+        CAPACITES.webllm = false;
     }
 
     return CAPACITES;

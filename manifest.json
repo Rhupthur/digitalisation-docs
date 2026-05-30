@@ -1,0 +1,37 @@
+{
+  "name": "Digitalisation Docs",
+  "short_name": "DigitaDocs",
+  "description": "Numérisation et extraction de données depuis des documents administratifs — offline, dans le navigateur.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a73e8",
+  "lang": "fr",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+        "src": "/assets/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+        },
+        {
+        "src": "/assets/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "maskable"
+        },
+        {
+        "src": "/assets/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+        },
+        {
+        "src": "/assets/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+        }
+    ]
+}
