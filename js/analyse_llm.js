@@ -64,9 +64,8 @@ var instanceWebLLM = null;
   depuis le CDN WebLLM au premier appel
   puis mis en cache dans le navigateur.
 
-  Lève une erreur si WebLLM n'est pas chargé,
-  si WebGPU est indisponible, ou si le
-  chargement du modèle échoue.
+  Lève une erreur si WebGPU est indisponible
+  ou si le chargement du modèle échoue.
 */
 async function chargerModelleLLM(onProgression) {
 
@@ -74,9 +73,9 @@ async function chargerModelleLLM(onProgression) {
         return instanceWebLLM;
     }
 
-    if (typeof CreateMLCEngine === 'undefined') {
-        throw new Error('analyse_llm.js — chargerModelleLLM() : WebLLM non chargé — vérifier libs.js');
-    }
+    // WebLLM n'est PAS exposé en global : il est importé dynamiquement
+    // plus bas via import('/libs/webllm.js'). On ne vérifie donc pas
+    // un éventuel CreateMLCEngine global (qui n'existe jamais ici).
 
     if (typeof CAPACITES === 'undefined' || !CAPACITES.webgpu) {
         throw new Error('analyse_llm.js — chargerModelleLLM() : WebGPU non disponible sur cette machine');

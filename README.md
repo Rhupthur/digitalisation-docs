@@ -44,7 +44,7 @@ digitaldocs/
 │   ├── extraction.js       ← Extraction texte (pdf.js + Tesseract OCR)
 │   ├── manuscrit.js        ← OCR manuscrit (Tesseract fra_best)
 │   ├── pretraitement.js    ← Nettoyage texte brut
-│   ├── pretraitement_image.js ← Amélioration image (OpenCV WASM)
+│   ├── pretraitement_image.js ← Amélioration image (OpenCV WASM) — ⚠️ pas encore branché au pipeline (voir Roadmap)
 │   ├── analyse.js          ← Extraction champs via wllama (CPU)
 │   ├── analyse_llm.js      ← Extraction champs via WebLLM (GPU)
 │   ├── export.js           ← Export JSON / CSV / Excel
@@ -88,11 +88,12 @@ Fichier (PDF / Image)
 
 ## Modèles IA
 
-| Moteur | Modèle | Taille | Matériel |
-|--------|--------|--------|----------|
-| wllama (CPU) | Qwen2.5-0.5B-Instruct Q4 | 469 MB | CPU (WASM SIMD) |
-| WebLLM (GPU) | Qwen2-1.5B-Instruct Q4F16 | ~830 MB | WebGPU (GPU dédié) |
-| WebLLM (GPU faible) | Qwen2-0.5B-Instruct Q4F16 | ~400 MB | WebGPU (GPU intégré) |
+| Moteur | Modèle | Taille | Matériel | Condition de sélection |
+|--------|--------|--------|----------|------------------------|
+| wllama (CPU) | Qwen2.5-0.5B-Instruct Q4 | 469 MB | CPU (WASM SIMD) | Pas de WebGPU **ou** RAM < 4 Go |
+| WebLLM (GPU) | Qwen2-1.5B-Instruct Q4F16 | ~830 MB | WebGPU | WebGPU **et** RAM ≥ 4 Go |
+
+> La sélection est faite dans `js/libs.js` : WebLLM n'est activé que si WebGPU est disponible **et** `deviceMemory >= 4`. En dessous, l'app bascule sur wllama (CPU). Le modèle WebLLM 0.5B prévu pour les GPU faibles n'est donc pas utilisé en l'état.
 
 ---
 
@@ -115,12 +116,33 @@ wget https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5
      -O models/qwen-wllama/qwen2.5-0.5b-q4.gguf
 ```
 
-### 3. Lancer le serveur
+### 3. Fournir les bibliothèques locales (`libs/`)
+
+> ⚠️ Le dossier `libs/` est **gitignoré** : il n'est pas présent après le clone. L'application ne démarrera pas tant qu'il n'est pas rempli.
+
+Placez les fichiers suivants dans `libs/` (versions récentes, à récupérer depuis les sources officielles ou un CDN puis à vendoriser localement) :
+
+```
+libs/
+├── pdf.min.mjs              ← pdf.js (mozilla/pdf.js)
+├── pdf.worker.min.mjs
+├── tesseract.min.js        ← Tesseract.js
+├── tessdata/               ← modèles OCR (fra, fra_best)
+├── opencv.js               ← OpenCV.js (WASM)
+├── webllm.js               ← @mlc-ai/web-llm (build ESM)
+└── wllama/
+    ├── wllama.js           ← wllama (llama.cpp WASM)
+    └── wllama.wasm
+```
+
+Les chemins attendus sont ceux référencés dans `js/libs.js`, `js/analyse.js`, `js/analyse_llm.js` et `js/pretraitement_image.js`.
+
+### 4. Lancer le serveur
 ```bash
 python3 serveur.py
 ```
 
-### 4. Ouvrir dans le navigateur
+### 5. Ouvrir dans le navigateur
 ```
 http://localhost:8080
 ```

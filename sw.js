@@ -31,6 +31,9 @@ var CACHE_FICHIERS = [
     '/libs/wllama/wllama.wasm',
     '/libs/opencv.js',
     '/manifest.json',
+    '/favicon.ico',
+    '/assets/icon-192.png',
+    '/assets/icon-512.png',
 ];
 
 /*
